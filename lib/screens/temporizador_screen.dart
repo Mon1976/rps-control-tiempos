@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
@@ -48,38 +49,44 @@ class _TemporizadorScreenState extends State<TemporizadorScreen> with SingleTick
 
   Future<void> _cargarDatosIniciales() async {
     try {
-      // Cargar categorías desde Firebase o usar predefinidas
-      final categoriasSnapshot = await _db.collection('categorias').get();
-      if (categoriasSnapshot.docs.isNotEmpty) {
-        _categorias = categoriasSnapshot.docs
-            .map((doc) => doc.data()['nombre'] as String? ?? '')
-            .where((nombre) => nombre.isNotEmpty)
-            .toList()
-          ..sort();
-      } else {
-        // Categorías predefinidas
-        _categorias = [
-          'Atención presencial en Despacho',
-          'Atención Telefónica',
-          'Contabilidad',
-          'Gestiones fuera del Despacho',
-          'Gestiones Bancarias',
-          'Preparación Juntas de Propietarios',
-          'Reuniones',
-          'Redacción de Actas',
-          'Registro de incidencias',
-          'Seguros (presupuestos, consultas, etc)',
-          'Siniestros',
-          'Formación',
-          'Gestión General Despacho',
-          'Comunicados y comunicaciones',
-          'Remesas de Recibos',
-          'Gestión extrajudicial deudas propietarios',
-          'Otra',
-        ];
-      }
+      // Categorías predefinidas
+      final categoriasPredefinidas = [
+        'Atención presencial en Despacho',
+        'Atención Telefónica',
+        'Contabilidad',
+        'Gestiones fuera del Despacho',
+        'Gestiones Bancarias',
+        'Preparación Juntas de Propietarios',
+        'Reuniones',
+        'Redacción de Actas',
+        'Registro de incidencias',
+        'Seguros (presupuestos, consultas, etc)',
+        'Siniestros',
+        'Formación',
+        'Gestión General Despacho',
+        'Comunicados y comunicaciones',
+        'Remesas de Recibos',
+        'Gestión extrajudicial deudas propietarios',
+        'Otra',
+      ];
 
-      // Cargar comunidades
+      // Cargar categorías personalizadas desde Firebase
+      final categoriasSnapshot = await _db.collection('categorias').get();
+      final categoriasPersonalizadas = categoriasSnapshot.docs
+          .map((doc) => doc.data()['nombre'] as String? ?? '')
+          .where((nombre) => nombre.isNotEmpty)
+          .toList();
+
+      // Combinar predefinidas + personalizadas (sin duplicados)
+      final todasCategorias = <String>{
+        ...categoriasPredefinidas,
+        ...categoriasPersonalizadas,
+      }.toList()
+        ..sort();
+
+      _categorias = todasCategorias;
+
+      // Cargar comunidades desde Firebase
       final comunidadesSnapshot = await _db.collection('comunidades').get();
       _comunidades = comunidadesSnapshot.docs
           .map((doc) => doc.data()['nombre'] as String? ?? '')
@@ -87,12 +94,23 @@ class _TemporizadorScreenState extends State<TemporizadorScreen> with SingleTick
           .toList()
         ..sort();
 
+      if (kDebugMode) {
+        print('📂 Categorías cargadas: ${_categorias.length}');
+        print('🏢 Comunidades cargadas: ${_comunidades.length}');
+      }
+
       setState(() => _isLoading = false);
     } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error al cargar datos: $e');
+      }
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar datos: $e')),
+          SnackBar(
+            content: Text('Error al cargar datos: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
