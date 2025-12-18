@@ -1,11 +1,11 @@
 {
-    "name": "control_tiempos",
-    "short_name": "control_tiempos",
+    "name": "RPS Control de Tiempos",
+    "short_name": "RPS Tiempos",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1976D2",
+    "theme_color": "#1976D2",
+    "description": "Aplicación profesional de gestión y análisis de tiempos de trabajo para RPS Administración de Fincas",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
