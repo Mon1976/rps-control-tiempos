@@ -5,6 +5,10 @@ import 'firebase_options.dart';
 import 'screens/registros_screen.dart';
 import 'screens/import_screen.dart';
 import 'screens/dashboard_mejorado_screen.dart';
+import 'screens/temporizador_screen.dart';
+import 'screens/add_edit_registro_screen.dart';
+import 'screens/gestion_comunidades_screen.dart';
+import 'screens/gestion_categorias_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,122 +98,216 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('RPS Control de Tiempos'),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
+        child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.access_time,
-                size: 100,
-                color: Colors.blue,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _status,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
-              if (_collections.isNotEmpty) ...[
-                const Text(
-                  'Colecciones encontradas:',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ..._collections.map((col) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Text(
-                    '• $col',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                )),
-              ],
-              const SizedBox(height: 30),
-              if (_hasRegistros) ...[
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const DashboardMejoradoScreen(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.dashboard),
-                  label: const Text('Dashboard Analítico'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
+              // Header compacto
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RegistrosScreen(),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF1976D2), Color(0xFF42A5F5)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.list),
-                  label: const Text('Ver Todos los Registros'),
+                      child: const Icon(
+                        Icons.access_time,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'RPS Control de Tiempos',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                          if (_hasRegistros)
+                            Text(
+                              '${_collections.firstWhere((c) => c.contains('registros_tiempo'), orElse: () => '0 registros').split('(')[1].replaceAll(')', '').replaceAll(' docs', '')} registros',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: _checkFirebase,
+                      icon: Icon(Icons.refresh, color: Colors.grey[600]),
+                      tooltip: 'Actualizar',
+                    ),
+                  ],
                 ),
-              ]
-              else
-                const Text(
-                  'No hay registros aún.\nImporta el CSV para comenzar.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
+              ),
+
+              // Lista de acciones principales
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Acciones Principales',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Temporizador
+                    _buildListTile(
+                      title: 'Temporizador',
+                      subtitle: 'Registra tu tiempo en directo',
+                      icon: Icons.play_circle_filled,
+                      iconColor: const Color(0xFF00C853),
+                      iconBgColor: const Color(0xFF00C853).withValues(alpha: 0.1),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TemporizadorScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Registro Manual
+                    _buildListTile(
+                      title: 'Registro Manual',
+                      subtitle: 'Añade una actividad pasada',
+                      icon: Icons.edit_calendar,
+                      iconColor: const Color(0xFF2196F3),
+                      iconBgColor: const Color(0xFF2196F3).withValues(alpha: 0.1),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AddEditRegistroScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Dashboard
+                    _buildListTile(
+                      title: 'Dashboard Analítico',
+                      subtitle: 'Análisis, gráficas y reportes PDF',
+                      icon: Icons.analytics,
+                      iconColor: const Color(0xFF7B1FA2),
+                      iconBgColor: const Color(0xFF7B1FA2).withValues(alpha: 0.1),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DashboardMejoradoScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Registros
+                    _buildListTile(
+                      title: 'Ver Registros',
+                      subtitle: 'Consulta y edita tus actividades',
+                      icon: Icons.list_alt,
+                      iconColor: const Color(0xFFFF6F00),
+                      iconBgColor: const Color(0xFFFF6F00).withValues(alpha: 0.1),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RegistrosScreen(),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Gestión
+                    Text(
+                      'Gestión',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Comunidades
+                    _buildListTile(
+                      title: 'Comunidades',
+                      subtitle: 'Crear, editar y eliminar comunidades',
+                      icon: Icons.apartment,
+                      iconColor: const Color(0xFF1976D2),
+                      iconBgColor: const Color(0xFF1976D2).withValues(alpha: 0.1),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GestionComunidadesScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Categorías
+                    _buildListTile(
+                      title: 'Categorías',
+                      subtitle: 'Crear, editar y eliminar categorías',
+                      icon: Icons.category,
+                      iconColor: const Color(0xFF7B1FA2),
+                      iconBgColor: const Color(0xFF7B1FA2).withValues(alpha: 0.1),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GestionCategoriasScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Importar CSV
+                    _buildListTile(
+                      title: 'Importar CSV',
+                      subtitle: 'Cargar registros desde archivo',
+                      icon: Icons.upload_file,
+                      iconColor: const Color(0xFF00897B),
+                      iconBgColor: const Color(0xFF00897B).withValues(alpha: 0.1),
+                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const ImportScreen(),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.upload_file),
-                    label: const Text('Importar CSV'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  OutlinedButton.icon(
-                    onPressed: _checkFirebase,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Recargar'),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -217,4 +315,88 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  Widget _buildListTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBgColor,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Icono
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: iconBgColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Texto
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Flecha
+                Icon(
+                  Icons.chevron_right,
+                  color: Colors.grey[400],
+                  size: 24,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
 }
