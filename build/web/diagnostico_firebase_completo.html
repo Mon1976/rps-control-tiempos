@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Firebase - RPS Apps</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+            background: #f8f9ff;
+        }
+        .test-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .data-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .code-block {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .firebase-info {
+            background: #fff5e6;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #ff9800;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico Completo Firebase</h1>
+        <p class="subtitle">Herramienta de diagnóstico para RPS Apps</p>
+
+        <div class="firebase-info">
+            <strong>📋 Información del Proyecto:</strong><br>
+            <strong>Project ID:</strong> rps-claim-manager-1f250<br>
+            <strong>URL Actual:</strong> <span id="currentUrl"></span>
+        </div>
+
+        <button onclick="runAllTests()">🚀 Ejecutar Diagnóstico Completo</button>
+        <button onclick="location.reload()">🔄 Reiniciar</button>
+
+        <!-- Test 1: Conexión Firebase -->
+        <div class="test-section" id="test1">
+            <div class="test-title">1️⃣ Conexión a Firebase</div>
+            <div id="result1" class="status loading">⏳ Esperando inicio...</div>
+        </div>
+
+        <!-- Test 2: Comunidades -->
+        <div class="test-section" id="test2">
+            <div class="test-title">2️⃣ Colección: Comunidades</div>
+            <div id="result2" class="status loading">⏳ Esperando inicio...</div>
+            <div id="comunidades-list"></div>
+        </div>
+
+        <!-- Test 3: Categorías -->
+        <div class="test-section" id="test3">
+            <div class="test-title">3️⃣ Colección: Categorías</div>
+            <div id="result3" class="status loading">⏳ Esperando inicio...</div>
+            <div id="categorias-list"></div>
+        </div>
+
+        <!-- Test 4: Claims -->
+        <div class="test-section" id="test4">
+            <div class="test-title">4️⃣ Colección: Claims (Siniestros)</div>
+            <div id="result4" class="status loading">⏳ Esperando inicio...</div>
+        </div>
+
+        <!-- Test 5: Incidencias -->
+        <div class="test-section" id="test5">
+            <div class="test-title">5️⃣ Colección: Incidencias</div>
+            <div id="result5" class="status loading">⏳ Esperando inicio...</div>
+        </div>
+
+        <!-- Test 6: Registros de Tiempo -->
+        <div class="test-section" id="test6">
+            <div class="test-title">6️⃣ Colección: Registros de Tiempo</div>
+            <div id="result6" class="status loading">⏳ Esperando inicio...</div>
+        </div>
+
+        <!-- Test 7: Permisos de Escritura -->
+        <div class="test-section" id="test7">
+            <div class="test-title">7️⃣ Prueba de Escritura</div>
+            <div id="result7" class="status loading">⏳ Esperando inicio...</div>
+        </div>
+
+        <!-- Resumen Final -->
+        <div class="test-section" id="summary" style="display:none; border-left-color: #28a745;">
+            <div class="test-title">📊 Resumen del Diagnóstico</div>
+            <div id="summary-content"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        // Mostrar URL actual
+        document.getElementById('currentUrl').textContent = window.location.hostname;
+
+        // Configuración Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1lA2TnGbYOqJwqvBU8l6Z9F6gkbqFZBc",
+            authDomain: "rps-claim-manager-1f250.firebaseapp.com",
+            projectId: "rps-claim-manager-1f250",
+            storageBucket: "rps-claim-manager-1f250.firebasestorage.app",
+            messagingSenderId: "461936537433",
+            appId: "1:461936537433:web:38a16e6e84d0e2fa4ca826"
+        };
+
+        let app, db;
+        const results = {
+            firebase: false,
+            comunidades: false,
+            categorias: false,
+            claims: false,
+            incidencias: false,
+            registros: false,
+            escritura: false
+        };
+
+        window.runAllTests = async function() {
+            try {
+                // Test 1: Inicializar Firebase
+                await testFirebaseConnection();
+                
+                // Test 2-6: Leer colecciones
+                await testCollection('comunidades', 'comunidades-list', 2);
+                await testCollection('categorias', 'categorias-list', 3);
+                await testCollectionCount('claims', 4);
+                await testCollectionCount('incidencias', 5);
+                await testCollectionCount('registros_tiempo', 6);
+                
+                // Test 7: Probar escritura
+                await testWrite();
+                
+                // Mostrar resumen
+                showSummary();
+            } catch (error) {
+                console.error('Error en diagnóstico:', error);
+            }
+        };
+
+        async function testFirebaseConnection() {
+            const resultDiv = document.getElementById('result1');
+            try {
+                resultDiv.textContent = '⏳ Conectando a Firebase...';
+                resultDiv.className = 'status loading';
+                
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                
+                resultDiv.textContent = '✅ Conexión exitosa a Firebase';
+                resultDiv.className = 'status success';
+                results.firebase = true;
+            } catch (error) {
+                resultDiv.textContent = `❌ Error de conexión: ${error.message}`;
+                resultDiv.className = 'status error';
+                results.firebase = false;
+            }
+        }
+
+        async function testCollection(collectionName, listId, testNumber) {
+            const resultDiv = document.getElementById(`result${testNumber}`);
+            const listDiv = document.getElementById(listId);
+            
+            try {
+                resultDiv.textContent = `⏳ Leyendo colección ${collectionName}...`;
+                resultDiv.className = 'status loading';
+                
+                const querySnapshot = await getDocs(collection(db, collectionName));
+                
+                if (querySnapshot.empty) {
+                    resultDiv.textContent = `⚠️ Colección ${collectionName} existe pero está vacía`;
+                    resultDiv.className = 'status info';
+                    results[collectionName] = true;
+                } else {
+                    const count = querySnapshot.size;
+                    resultDiv.textContent = `✅ ${count} documento(s) encontrado(s) en ${collectionName}`;
+                    resultDiv.className = 'status success';
+                    results[collectionName] = true;
+                    
+                    // Mostrar primeros 5 documentos
+                    let html = '<div style="margin-top: 10px;"><strong>Documentos:</strong></div>';
+                    querySnapshot.docs.slice(0, 5).forEach(doc => {
+                        const data = doc.data();
+                        const nombre = data.nombre || data.descripcion || data.tipo || 'Sin nombre';
+                        html += `<div class="data-item">📄 <strong>${doc.id}</strong>: ${nombre}</div>`;
+                    });
+                    if (querySnapshot.size > 5) {
+                        html += `<div class="data-item">... y ${querySnapshot.size - 5} más</div>`;
+                    }
+                    listDiv.innerHTML = html;
+                }
+            } catch (error) {
+                if (error.code === 'permission-denied') {
+                    resultDiv.innerHTML = `❌ PERMISO DENEGADO para ${collectionName}<br><br>
+                        <strong>🔧 Solución:</strong><br>
+                        1. Ve a <a href="https://console.firebase.google.com/project/rps-claim-manager-1f250/firestore/rules" target="_blank">Firebase Rules</a><br>
+                        2. Asegúrate de que existe esta regla:<br>
+                        <div class="code-block">match /${collectionName}/{document=**} {<br>
+                        &nbsp;&nbsp;allow read, write: if true;<br>
+                        }</div>`;
+                    resultDiv.className = 'status error';
+                } else {
+                    resultDiv.textContent = `❌ Error: ${error.message}`;
+                    resultDiv.className = 'status error';
+                }
+                results[collectionName] = false;
+            }
+        }
+
+        async function testCollectionCount(collectionName, testNumber) {
+            const resultDiv = document.getElementById(`result${testNumber}`);
+            
+            try {
+                resultDiv.textContent = `⏳ Leyendo colección ${collectionName}...`;
+                resultDiv.className = 'status loading';
+                
+                const querySnapshot = await getDocs(collection(db, collectionName));
+                const count = querySnapshot.size;
+                
+                resultDiv.textContent = `✅ ${count} documento(s) en ${collectionName}`;
+                resultDiv.className = 'status success';
+                results[collectionName] = true;
+            } catch (error) {
+                if (error.code === 'permission-denied') {
+                    resultDiv.innerHTML = `❌ PERMISO DENEGADO para ${collectionName}`;
+                    resultDiv.className = 'status error';
+                } else {
+                    resultDiv.textContent = `❌ Error: ${error.message}`;
+                    resultDiv.className = 'status error';
+                }
+                results[collectionName] = false;
+            }
+        }
+
+        async function testWrite() {
+            const resultDiv = document.getElementById('result7');
+            
+            try {
+                resultDiv.textContent = '⏳ Probando permisos de escritura...';
+                resultDiv.className = 'status loading';
+                
+                // Intentar crear un documento de prueba
+                const testDoc = await addDoc(collection(db, '_test'), {
+                    test: true,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Eliminar el documento de prueba
+                await deleteDoc(doc(db, '_test', testDoc.id));
+                
+                resultDiv.textContent = '✅ Permisos de escritura funcionando correctamente';
+                resultDiv.className = 'status success';
+                results.escritura = true;
+            } catch (error) {
+                if (error.code === 'permission-denied') {
+                    resultDiv.innerHTML = `⚠️ Permisos de escritura limitados (puede ser normal en producción)`;
+                    resultDiv.className = 'status info';
+                } else {
+                    resultDiv.textContent = `❌ Error en escritura: ${error.message}`;
+                    resultDiv.className = 'status error';
+                }
+                results.escritura = false;
+            }
+        }
+
+        function showSummary() {
+            const summaryDiv = document.getElementById('summary');
+            const contentDiv = document.getElementById('summary-content');
+            
+            const passed = Object.values(results).filter(r => r === true).length;
+            const total = Object.keys(results).length;
+            
+            let html = `<div class="status ${passed === total ? 'success' : 'error'}">
+                <strong>Pruebas pasadas: ${passed}/${total}</strong>
+            </div>`;
+            
+            html += '<div style="margin-top: 15px;"><strong>Detalles:</strong></div>';
+            for (const [key, value] of Object.entries(results)) {
+                const icon = value ? '✅' : '❌';
+                const label = key.charAt(0).toUpperCase() + key.slice(1);
+                html += `<div class="data-item">${icon} ${label}: ${value ? 'OK' : 'ERROR'}</div>`;
+            }
+            
+            if (passed < total) {
+                html += `<div class="status error" style="margin-top: 20px;">
+                    <strong>⚠️ Acción Requerida:</strong><br><br>
+                    1. Verifica las reglas de Firestore en:<br>
+                    <a href="https://console.firebase.google.com/project/rps-claim-manager-1f250/firestore/rules" target="_blank">
+                        Firebase Console - Rules
+                    </a><br><br>
+                    2. Verifica los dominios autorizados en:<br>
+                    <a href="https://console.firebase.google.com/project/rps-claim-manager-1f250/authentication/settings" target="_blank">
+                        Firebase Console - Authentication
+                    </a><br><br>
+                    3. Dominio actual: <strong>${window.location.hostname}</strong>
+                </div>`;
+            } else {
+                html += `<div class="status success" style="margin-top: 20px;">
+                    ✅ <strong>Todo funciona correctamente!</strong><br>
+                    Tu configuración de Firebase está OK.
+                </div>`;
+            }
+            
+            contentDiv.innerHTML = html;
+            summaryDiv.style.display = 'block';
+        }
+
+        // Auto-ejecutar al cargar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                window.runAllTests();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
