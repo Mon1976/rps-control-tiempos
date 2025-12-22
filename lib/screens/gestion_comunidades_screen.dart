@@ -348,7 +348,7 @@ class _GestionComunidadesScreenState extends State<GestionComunidadesScreen> {
                           child: const Icon(Icons.apartment, color: Colors.blue, size: 28),
                         ),
                         title: Text(
-                          comunidad['nombre'] as String,
+                          (comunidad['nombre'] as String?) ?? 'Sin nombre',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
