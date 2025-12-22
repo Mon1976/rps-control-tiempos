@@ -87,7 +87,7 @@ class _TemporizadorScreenState extends State<TemporizadorScreen> with SingleTick
       _categorias = todasCategorias;
 
       // Cargar comunidades desde Firebase
-      final comunidadesSnapshot = await _db.collection('comunidades').get();
+      final comunidadesSnapshot = await _db.collection('comunidades_tiempos').get();
       _comunidades = comunidadesSnapshot.docs
           .map((doc) => doc.data()['nombre'] as String? ?? '')
           .where((nombre) => nombre.isNotEmpty)
@@ -255,7 +255,7 @@ class _TemporizadorScreenState extends State<TemporizadorScreen> with SingleTick
     if (result != null && result.isNotEmpty) {
       try {
         // Guardar en Firebase
-        await _db.collection('comunidades').add({'nombre': result});
+        await _db.collection('comunidades_tiempos').add({'nombre': result});
         
         setState(() {
           _comunidades.add(result);

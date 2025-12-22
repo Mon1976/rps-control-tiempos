@@ -21,7 +21,7 @@ class _GestionComunidadesScreenState extends State<GestionComunidadesScreen> {
 
   Future<void> _cargarComunidades() async {
     try {
-      final snapshot = await _db.collection('comunidades').get();
+      final snapshot = await _db.collection('comunidades_tiempos').get();
       setState(() {
         _comunidades = snapshot.docs
             .map((doc) => {
@@ -97,7 +97,7 @@ class _GestionComunidadesScreenState extends State<GestionComunidadesScreen> {
 
     if (result != null && result.isNotEmpty) {
       try {
-        await _db.collection('comunidades').add({'nombre': result});
+        await _db.collection('comunidades_tiempos').add({'nombre': result});
         _cargarComunidades();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -174,7 +174,7 @@ class _GestionComunidadesScreenState extends State<GestionComunidadesScreen> {
 
     if (result != null && result.isNotEmpty && result != nombreActual) {
       try {
-        await _db.collection('comunidades').doc(id).update({'nombre': result});
+        await _db.collection('comunidades_tiempos').doc(id).update({'nombre': result});
         _cargarComunidades();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -239,7 +239,7 @@ class _GestionComunidadesScreenState extends State<GestionComunidadesScreen> {
 
     if (confirm == true) {
       try {
-        await _db.collection('comunidades').doc(id).delete();
+        await _db.collection('comunidades_tiempos').doc(id).delete();
         _cargarComunidades();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

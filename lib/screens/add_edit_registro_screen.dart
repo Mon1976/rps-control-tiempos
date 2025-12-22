@@ -82,7 +82,7 @@ class _AddEditRegistroScreenState extends State<AddEditRegistroScreen> {
 
   Future<void> _cargarComunidades() async {
     try {
-      final snapshot = await _db.collection('comunidades').get();
+      final snapshot = await _db.collection('comunidades_tiempos').get();
       setState(() {
         _comunidades = snapshot.docs
             .map((doc) => doc.data()['nombre'] as String? ?? '')
